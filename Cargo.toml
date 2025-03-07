@@ -13,6 +13,6 @@ exclude = ["target/", ".git/", ".github/", "*.lock"]
 
 [features]
 std = []
-defmt = []
 
 [dependencies]
+defmt = { version = "0.3.10", optional = true }

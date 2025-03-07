@@ -1,5 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(not(feature = "defmt"))]
 use core::fmt::Debug;
 
 #[cfg(feature = "defmt")]
