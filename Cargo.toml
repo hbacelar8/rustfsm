@@ -11,4 +11,8 @@ readme = "README.md"
 keywords = ["rustfsm", "state", "machine", "fsm"]
 exclude = ["target/", ".git/", ".github/", "*.lock"]
 
+[features]
+std = []
+defmt = []
+
 [dependencies]

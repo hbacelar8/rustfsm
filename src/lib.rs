@@ -1,12 +1,15 @@
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-use core::fmt;
+use core::fmt::Debug;
+
+#[cfg(feature = "defmt")]
+use defmt::Format as Debug;
 
 /// Trait for the state behavior
 pub trait StateBehavior {
-    type State: Clone + Copy + PartialEq + fmt::Debug;
-    type Event: Clone + Copy + PartialEq + fmt::Debug;
-    type Context: Default + fmt::Debug;
+    type State: Clone + Copy + PartialEq + Debug;
+    type Event: Clone + Copy + PartialEq + Debug;
+    type Context;
 
     /// Handle an event and return next state (if a transition occurs)
     fn handle(&self, event: &Self::Event, _context: &mut Self::Context) -> Option<Self::State>;
@@ -83,8 +86,7 @@ macro_rules! rustfsm {
             $($member_field:ident: $member_field_type:ty = $member_default:expr),* $(,)?
         },
         $state_type:ident {
-            $first_state:ident $(($($first_state_data:ty),*))?,
-            $($remaining_states:ident $(($($remaining_state_data:ty),*))? ),* $(,)?
+            $($state_variant:ident $(($($state_variant_data:ty),*))? ),* $(,)?
         },
         $event_type:ident {
             $($event_variant:ident $(($($event_variant_data:ty),*))? ),* $(,)?
@@ -94,20 +96,18 @@ macro_rules! rustfsm {
         }
     ) => {
         rustfsm!(@generate $state_machine_name, $state_type, $event_type, $context_type,
-            states { $first_state $(($($first_state_data),*))?, $($remaining_states $(($($remaining_state_data),*))? ),* },
+            states { $($state_variant $(($($state_variant_data),*))? ),* },
             events { $($event_variant $(($($event_variant_data),*))? ),* },
             context { $($context_field: $context_field_type = $context_default),* },
-            members { $($member_field: $member_field_type = $member_default),* },
-            initial_state = $first_state
+            members { $($member_field: $member_field_type = $member_default),* }
         );
     };
 
-    // Case 1: Without additional members for the state machine struct
+    // Case 2: Without additional members for the state machine struct
     (
         $state_machine_name:ident,
         $state_type:ident {
-            $first_state:ident $(($($first_state_data:ty),*))?,
-            $($remaining_states:ident $(($($remaining_state_data:ty),*))? ),* $(,)?
+            $($state_variant:ident $(($($state_variant_data:ty),*))? ),* $(,)?
         },
         $event_type:ident {
             $($event_variant:ident $(($($event_variant_data:ty),*))? ),* $(,)?
@@ -117,11 +117,10 @@ macro_rules! rustfsm {
         }
     ) => {
         rustfsm!(@generate $state_machine_name, $state_type, $event_type, $context_type,
-            states { $first_state $(($($first_state_data),*))?, $($remaining_states $(($($remaining_state_data),*))? ),* },
+            states { $($state_variant $(($($state_variant_data),*))? ),* },
             events { $($event_variant $(($($event_variant_data),*))? ),* },
             context { $($context_field: $context_field_type = $context_default),* },
-            members { },
-            initial_state = $first_state
+            members { }
         );
     };
 
@@ -131,12 +130,11 @@ macro_rules! rustfsm {
         states { $($state_variant:ident $(($($state_variant_data:ty),*))? ),* },
         events { $($event_variant:ident $(($($event_variant_data:ty),*))? ),* },
         context { $($context_field:ident: $context_field_type:ty = $context_default:expr),* },
-        members { $($member_field:ident: $member_field_type:ty = $member_default:expr),* },
-        initial_state = $initial_state:ident
+        members { $($member_field:ident: $member_field_type:ty = $member_default:expr),* }
     ) => {
         /// State machine state type.
         ///
-        /// - The first state in the list is the state machine's initial state.
+        /// List of all states composing the state machine.
         #[derive(Clone, Copy, PartialEq, Debug)]
         pub enum $state_type {
             $(
@@ -187,9 +185,9 @@ macro_rules! rustfsm {
 
         impl $state_machine_name {
             /// Create a new state machine.
-            pub fn new() -> Self {
+            pub fn new(initial_state: $state_type) -> Self {
                 Self {
-                    current_state: $state_type::$initial_state,
+                    current_state: initial_state,
                     context: $context_type::default(),
                     $(
                         $member_field: $member_default,

@@ -110,8 +110,7 @@ impl Mario {
     }
 }
 
-#[test]
-fn integration_test() {
+fn main() {
     let mut mario = Mario::new(MarioStates::AliveMario(AliveStates::SmallMario));
 
     // Get a mushroom
