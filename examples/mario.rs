@@ -1,12 +1,3 @@
-# RustFSM
-
-A full static Rust finite state machine library.
-
-Compatible with `no_std` and embedded environments.
-
-## Example
-
-```rust
 use rustfsm::{rustfsm, StateBehavior};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -173,7 +164,3 @@ fn main() {
     assert_eq!(mario.number_of_coins(), 0);
     assert!(!mario.is_alive());
 }
-
-```
-
-> It's a me! 🍄
