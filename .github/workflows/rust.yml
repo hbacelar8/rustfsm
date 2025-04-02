@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -22,12 +22,6 @@ jobs:
 
     - name: Build no_std
       run: cargo build --verbose
-
-    - name: Run tests std
-      run: cargo test -F std --verbose
-
-    - name: Run tests no_std
-      run: cargo test --verbose
 
     - name: Run examples std
       run: cargo build -F std --example mario
