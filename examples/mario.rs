@@ -30,14 +30,24 @@ enum States {
 #[derive(Clone, Copy, PartialEq)]
 enum Events {
     GetConsumable(MarioConsumables),
-    HitMonster,
+    GetHit,
 }
 
-#[derive(Default)]
 struct Context {
+    number_of_lifes: u8,
     number_of_coins: u16,
 }
 
+impl Default for Context {
+    fn default() -> Self {
+        Self {
+            number_of_lifes: 1,
+            number_of_coins: 0,
+        }
+    }
+}
+
+// Generate the state machine
 rustfsm!(Mario, States, Events, Context);
 
 impl StateBehavior for States {
@@ -47,6 +57,8 @@ impl StateBehavior for States {
 
     fn enter(&self, context: &mut Self::Context) {
         match self {
+            States::AliveMario(AliveStates::SmallMario) => context.number_of_coins = 0,
+
             States::AliveMario(AliveStates::BigMario(BigMarioStates::SuperMario)) => {
                 context.number_of_coins += 100
             }
@@ -59,7 +71,7 @@ impl StateBehavior for States {
                 context.number_of_coins += 300
             }
 
-            _ => (),
+            States::DeadMario => context.number_of_lifes = 0,
         }
     }
 
@@ -89,15 +101,16 @@ impl StateBehavior for States {
                 GetConsumable(Feather),
             ) => Some(AliveMario(BigMario(CapeMario))),
 
-            (AliveMario(SmallMario), HitMonster) => {
-                context.number_of_coins = 0;
-                Some(DeadMario)
+            (AliveMario(SmallMario), GetHit) => {
+                if context.number_of_lifes == 1 {
+                    Some(DeadMario)
+                } else {
+                    context.number_of_lifes -= 1;
+                    None
+                }
             }
 
-            (_, HitMonster) => {
-                context.number_of_coins = 0;
-                Some(AliveMario(SmallMario))
-            }
+            (AliveMario(BigMario(_)), GetHit) => Some(AliveMario(SmallMario)),
 
             _ => None,
         }
@@ -109,8 +122,20 @@ impl Mario {
         self.current_state != States::DeadMario
     }
 
-    fn number_of_coins(&self) -> u16 {
+    fn get_number_of_lifes(&self) -> u8 {
+        self.context.number_of_lifes
+    }
+
+    fn get_number_of_coins(&self) -> u16 {
         self.context.number_of_coins
+    }
+
+    fn get_consummable(&mut self, consummable: MarioConsumables) {
+        self.handle(Events::GetConsumable(consummable));
+    }
+
+    fn get_hit(&mut self) {
+        self.handle(Events::GetHit);
     }
 }
 
@@ -118,47 +143,53 @@ fn main() {
     let mut mario = Mario::new(States::AliveMario(AliveStates::SmallMario));
 
     // Get a mushroom
-    mario.handle(Events::GetConsumable(MarioConsumables::Mushroom));
+    mario.get_consummable(MarioConsumables::Mushroom);
     assert!(
         mario.get_current_state()
             == States::AliveMario(AliveStates::BigMario(BigMarioStates::SuperMario)),
     );
-    assert_eq!(mario.number_of_coins(), 100);
+    assert!(mario.get_number_of_lifes() == 1);
+    assert!(mario.get_number_of_coins() == 100);
     assert!(mario.is_alive());
 
     // Get a hit
-    mario.handle(Events::HitMonster);
+    mario.get_hit();
     assert!(mario.get_current_state() == States::AliveMario(AliveStates::SmallMario));
-    assert_eq!(mario.number_of_coins(), 0);
+    assert!(mario.get_number_of_lifes() == 1);
+    assert!(mario.get_number_of_coins() == 0);
     assert!(mario.is_alive());
 
     // Get a flower
-    mario.handle(Events::GetConsumable(MarioConsumables::Flower));
+    mario.get_consummable(MarioConsumables::Flower);
     assert!(
         mario.get_current_state()
             == States::AliveMario(AliveStates::BigMario(BigMarioStates::FireMario))
     );
-    assert_eq!(mario.number_of_coins(), 200);
+    assert!(mario.get_number_of_lifes() == 1);
+    assert!(mario.get_number_of_coins() == 200);
     assert!(mario.is_alive());
 
     // Get a feather
-    mario.handle(Events::GetConsumable(MarioConsumables::Feather));
+    mario.get_consummable(MarioConsumables::Feather);
     assert!(
         mario.get_current_state()
             == States::AliveMario(AliveStates::BigMario(BigMarioStates::CapeMario))
     );
-    assert_eq!(mario.number_of_coins(), 500);
+    assert!(mario.get_number_of_lifes() == 1);
+    assert!(mario.get_number_of_coins() == 500);
     assert!(mario.is_alive());
 
     // Get a hit
-    mario.handle(Events::HitMonster);
+    mario.get_hit();
     assert!(mario.get_current_state() == States::AliveMario(AliveStates::SmallMario));
-    assert_eq!(mario.number_of_coins(), 0);
+    assert!(mario.get_number_of_lifes() == 1);
+    assert!(mario.get_number_of_coins() == 0);
     assert!(mario.is_alive());
 
     // Oh no
-    mario.handle(Events::HitMonster);
+    mario.get_hit();
     assert!(mario.get_current_state() == States::DeadMario);
-    assert_eq!(mario.number_of_coins(), 0);
+    assert!(mario.get_number_of_lifes() == 0);
+    assert!(mario.get_number_of_coins() == 0);
     assert!(!mario.is_alive());
 }
