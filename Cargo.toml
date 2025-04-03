@@ -9,7 +9,7 @@ repository = "https://github.com/hbacelar8/rustfsm"
 documentation = "https://docs.rs/rustfsm"
 readme = "README.md"
 keywords = ["rustfsm", "state", "machine", "fsm"]
-exclude = ["target/", "examples/", ".git/", ".github/", "*.lock"]
+exclude = ["target/", ".git/", ".github/", "*.lock"]
 
 [features]
 std = []
