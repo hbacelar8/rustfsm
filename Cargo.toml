@@ -1,12 +1,12 @@
 [package]
 name = "rustfsm-macro"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["H Bacelar <dev@bacelar.fr>"]
 description = "A full static Rust finite state machine macro library"
 license = "MIT"
 repository = "https://github.com/hbacelar8/rustfsm"
-documentation = "https://docs.rs/rustfsm"
+documentation = "https://docs.rs/rustfsm_macro"
 readme = "README.md"
 keywords = ["rustfsm", "state", "machine", "fsm"]
 exclude = ["target/", ".git/", ".github/", "*.lock"]
