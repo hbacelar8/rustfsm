@@ -1,4 +1,4 @@
-use rustfsm::{rustfsm, StateBehavior};
+use rustfsm_macro::{rustfsm, StateBehavior};
 
 #[derive(Clone, Copy, PartialEq)]
 enum MarioConsumables {
@@ -145,7 +145,7 @@ fn main() {
     // Get a mushroom
     mario.get_consummable(MarioConsumables::Mushroom);
     assert!(
-        mario.get_current_state()
+        mario.current_state()
             == States::AliveMario(AliveStates::BigMario(BigMarioStates::SuperMario)),
     );
     assert!(mario.get_number_of_lifes() == 1);
@@ -154,7 +154,7 @@ fn main() {
 
     // Get a hit
     mario.get_hit();
-    assert!(mario.get_current_state() == States::AliveMario(AliveStates::SmallMario));
+    assert!(mario.current_state() == States::AliveMario(AliveStates::SmallMario));
     assert!(mario.get_number_of_lifes() == 1);
     assert!(mario.get_number_of_coins() == 0);
     assert!(mario.is_alive());
@@ -162,7 +162,7 @@ fn main() {
     // Get a flower
     mario.get_consummable(MarioConsumables::Flower);
     assert!(
-        mario.get_current_state()
+        mario.current_state()
             == States::AliveMario(AliveStates::BigMario(BigMarioStates::FireMario))
     );
     assert!(mario.get_number_of_lifes() == 1);
@@ -172,7 +172,7 @@ fn main() {
     // Get a feather
     mario.get_consummable(MarioConsumables::Feather);
     assert!(
-        mario.get_current_state()
+        mario.current_state()
             == States::AliveMario(AliveStates::BigMario(BigMarioStates::CapeMario))
     );
     assert!(mario.get_number_of_lifes() == 1);
@@ -181,14 +181,14 @@ fn main() {
 
     // Get a hit
     mario.get_hit();
-    assert!(mario.get_current_state() == States::AliveMario(AliveStates::SmallMario));
+    assert!(mario.current_state() == States::AliveMario(AliveStates::SmallMario));
     assert!(mario.get_number_of_lifes() == 1);
     assert!(mario.get_number_of_coins() == 0);
     assert!(mario.is_alive());
 
     // Oh no
     mario.get_hit();
-    assert!(mario.get_current_state() == States::DeadMario);
+    assert!(mario.current_state() == States::DeadMario);
     assert!(mario.get_number_of_lifes() == 0);
     assert!(mario.get_number_of_coins() == 0);
     assert!(!mario.is_alive());
