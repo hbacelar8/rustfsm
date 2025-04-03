@@ -1,4 +1,4 @@
-use rustfsm::{rustfsm, StateBehavior};
+use rustfsm_macro::{rustfsm, StateBehavior};
 
 #[derive(Clone, Copy, PartialEq)]
 enum MarioConsumables {

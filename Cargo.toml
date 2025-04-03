@@ -1,9 +1,9 @@
 [package]
-name = "rustfsm"
+name = "rustfsm-macro"
 version = "0.1.0"
 edition = "2021"
 authors = ["H Bacelar <dev@bacelar.fr>"]
-description = "A full static Rust finite state machine library"
+description = "A full static Rust finite state machine macro library"
 license = "MIT"
 repository = "https://github.com/hbacelar8/rustfsm"
 documentation = "https://docs.rs/rustfsm"
