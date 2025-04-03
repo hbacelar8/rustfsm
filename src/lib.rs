@@ -130,8 +130,8 @@ macro_rules! rustfsm {
                 self.current_state = new_state;
             }
 
-            /// Get a copy of the current state
-            pub fn get_current_state(&self) -> $state_type {
+            /// Get the current state
+            pub fn current_state(&self) -> $state_type {
                 self.current_state
             }
 
